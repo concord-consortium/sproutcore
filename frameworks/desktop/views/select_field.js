@@ -251,6 +251,16 @@ SC.SelectFieldView = SC.FieldView.extend(
     } else return sc_super();
   },
    
+  /** @private */
+  touchStart: function(evt) {
+    return this.mouseDown(evt);
+  },
+
+  /** @private */
+  touchEnd: function(evt) {
+    return this.mouseUp(evt);
+  },
+
   // when fetching the raw value, convert back to an object if needed...
   /** @private */
   getFieldValue: function() {
