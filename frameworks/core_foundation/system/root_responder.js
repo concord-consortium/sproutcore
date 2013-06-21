@@ -1272,11 +1272,21 @@ SC.RootResponder = SC.Object.extend(
       for (idx = 0; idx < len; idx++) {
         touch = touches[idx];
 
+        // Chrome for Android can send touchstart for the same touch twice in a row. This confuses
+        // makeTouchResponder in a way that causes subsequent touchmove events to be ignored.
+        // https://code.google.com/p/chromium/issues/detail?id=249343
+
+        if (this._touches[touch.identifier] && this._touches[touch.identifier].lastEvent === 'touchstart') {
+          continue;
+        }
+
         // Create an SC.Touch instance for every touch.
         touchEntry = SC.Touch.create(touch, this);
 
         // skip the touch if there was no target
         if (!touchEntry.targetView) continue;
+
+        touchEntry.lastEvent = 'touchstart';
 
         // account for hidden touch intercept (passing through touches, etc.)
         if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
@@ -1343,6 +1353,8 @@ SC.RootResponder = SC.Object.extend(
         if (!touchEntry) {
           continue;
         }
+
+        touchEntry.lastEvent = 'touchmove';
 
         if (touchEntry.hidesTouchIntercept) hidingTouchIntercept = YES;
 
@@ -1434,6 +1446,8 @@ SC.RootResponder = SC.Object.extend(
 
         // check if there is an entry
         if (!touchEntry) continue;
+
+        touchEntry.lastEvent = 'touchend';
 
         // continue work
         touchEntry.timeStamp = evt.timeStamp;
@@ -2121,6 +2135,8 @@ SC.Touch = function(touch, touchContext) {
   this.clientY = touch.clientY;
   this.screenX = touch.screenX;
   this.screenY = touch.screenY;
+
+  this.lastEvent = undefined;
 };
 
 SC.Touch.prototype = {
