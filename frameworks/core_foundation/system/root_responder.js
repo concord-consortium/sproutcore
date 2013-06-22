@@ -1162,6 +1162,10 @@ SC.RootResponder = SC.Object.extend(
 
     // end said touches
     for (idx = 0, len = end.length; idx < len; idx++) {
+      // endMissingTouches could confuse our doubled-touchstart check
+      if (this._touches[end[idx].identifier]) {
+        this._touches[end[idx].identifier].lastEvent = 'touchend';
+      }
       this.endTouch(end[idx]);
       this.finishTouch(end[idx]);
     }
